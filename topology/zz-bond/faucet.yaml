@@ -23,6 +23,7 @@ dps:
         receive_lldp: true
         tagged_vlans: [171]
     lldp_beacon: {max_per_interval: 5, send_interval: 5}
+    use_hard_timeout: true
   nz-kiwi-t1sw2:
     combinatorial_port_flood: true
     dp_id: 178
@@ -47,6 +48,7 @@ dps:
         receive_lldp: true
         tagged_vlans: [171]
     lldp_beacon: {max_per_interval: 5, send_interval: 5}
+    use_hard_timeout: true
   nz-kiwi-t2sw1:
     combinatorial_port_flood: true
     dp_id: 2352
@@ -67,6 +69,7 @@ dps:
         receive_lldp: true
         tagged_vlans: [171]
     lldp_beacon: {max_per_interval: 5, send_interval: 5}
+    use_hard_timeout: true
   nz-kiwi-t2sw2:
     combinatorial_port_flood: true
     dp_id: 1296
@@ -87,6 +90,7 @@ dps:
         receive_lldp: true
         tagged_vlans: [171]
     lldp_beacon: {max_per_interval: 5, send_interval: 5}
+    use_hard_timeout: true
 include: [uniform.yaml]
 version: 2
 vlans:

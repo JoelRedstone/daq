@@ -3,7 +3,6 @@ dps:
     dp_id: 147058200621
     faucet_dp_mac: 0e:00:00:00:01:01
     hardware: GenericTFM
-    hard_timeout: true
     interfaces:
       9:
         lldp_beacon: {enable: true}
@@ -23,11 +22,11 @@ dps:
         native_vlan: 171
         receive_lldp: true
     lldp_beacon: {max_per_interval: 5, send_interval: 5}
+    use_hard_timeout: true
   us-mtv-900-t1sw2-0-2:
     dp_id: 147058200561
     faucet_dp_mac: 0e:00:00:00:01:02
     hardware: GenericTFM
-    hard_timeout: true
     interfaces:
       9:
         lldp_beacon: {enable: true}
@@ -47,11 +46,11 @@ dps:
         native_vlan: 171
         receive_lldp: true
     lldp_beacon: {max_per_interval: 5, send_interval: 5}
+    use_hard_timeout: true
   us-mtv-900-t2sw2-0-1:
     dp_id: 246406200719452
     faucet_dp_mac: 0e:00:00:00:02:01
     hardware: Allied-Telesis
-    hard_timeout: true
     interface_ranges:
       1-46: {description: IoT Host, native_vlan: 171}
     interfaces:
@@ -67,11 +66,11 @@ dps:
         native_vlan: 171
         receive_lldp: true
     lldp_beacon: {max_per_interval: 5, send_interval: 5}
+    use_hard_timeout: true
   us-mtv-900-t2sw2-0-2:
     dp_id: 246406200719346
     faucet_dp_mac: 0e:00:00:00:02:02
     hardware: Allied-Telesis
-    hard_timeout: true
     interface_ranges:
       1-46: {description: IoT Host, native_vlan: 171}
     interfaces:
@@ -87,6 +86,7 @@ dps:
         native_vlan: 171
         receive_lldp: true
     lldp_beacon: {max_per_interval: 5, send_interval: 5}
+    use_hard_timeout: true
 version: 2
 vlans:
   171: {description: BOS-IOT}
