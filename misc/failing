@@ -24,12 +24,12 @@ while true; do
     while $TEST > /dev/null 2>&1 ; do
         sleep 1
     done
-    
+
     now_time=`date +%s`
     echo `date` FAILING ping $TARGET after $((now_time - then_time))s
     then_time=$now_time
     sleep 1
-    
+
     while ! $TEST > /dev/null 2>&1 ; do
         sleep 1
     done
@@ -37,6 +37,6 @@ while true; do
     now_time=`date +%s`
     echo `date` Passing ping $TARGET after $((now_time - then_time))s
     then_time=$now_time
-    
+
     sleep 1
 done
