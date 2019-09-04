@@ -17,27 +17,31 @@ public class TuningTest {
     private BacnetPoints bacnetPoints = new BacnetPoints();
     private String localIp = "";
     private String broadcastIp = "";
+    private boolean verboseOutput = true;
     private boolean bacnetSupported = false;
     private boolean testPassed = true;
     private String reportAppendix = "";
+    private String description_of_failed_report = "";
     private String jsonFilePath = "bacnet_tuning.json";
     private String testName = "protocol.bacnet.tuning";
+    private String testDescription = "Check if bacnet device is compliant with tuning policy provided.";
     private String passedTestReport = String.format("RESULT pass %s\n", testName);
     private String failedTestReport = String.format("RESULT fail %s\n", testName);
     private String skippedTestReport = String.format("RESULT skip %s\n", testName);
     private String formatProperty = "%-25s%-20s%-30s%-1s";
     private int sizeProperty = 35;
 
-    private boolean debug = true;
+    private boolean debug = false;
 
     String tuningObjectType;
     Map<String, String> tuningPointsMap;
     Multimap<String, Map<String, String>> devicePointsMap;
     ArrayList<String> deviceObjectTypeList;
 
-    public TuningTest(String localIp, String broadcastIp) throws Exception {
+    public TuningTest(String localIp, String broadcastIp, boolean verboseOutput) throws Exception {
         this.localIp = localIp;
         this.broadcastIp = broadcastIp;
+        this.verboseOutput = verboseOutput;
         discoverDevices();
     }
 
@@ -204,6 +208,7 @@ public class TuningTest {
             return true;
         }
         appendToReport(deviceObjectType, deviceBACnetProperty, deviceValue, tuningValue, "FAILED", " >= ");
+        appendToDescriptionOfFailedReport(deviceObjectType, deviceBACnetProperty, deviceValue, tuningValue, "FAILED", " >= ");
         failedTest();
         return false;
     }
@@ -214,6 +219,7 @@ public class TuningTest {
             return true;
         }
         appendToReport(deviceObjectType, deviceBACnetProperty, deviceValue, tuningValue, "FAILED", " <= ");
+        appendToDescriptionOfFailedReport(deviceObjectType, deviceBACnetProperty, deviceValue, tuningValue, "FAILED", " <= ");
         failedTest();
         return false;
     }
@@ -238,6 +244,12 @@ public class TuningTest {
         reportAppendix += String.format(formatProperty, devicePropertyType, deviceProperty,
                 StringUtils.center(devicePropertyValue + " - " + propertyValue, sizeProperty), result+"\n");
         failedTest();
+    }
+
+    private void appendToDescriptionOfFailedReport(String deviceObjectType, String devicePropertyType, String devicePropertyValue,
+                                                   String tunningValue, String result, String operation) {
+        description_of_failed_report += String.format(formatProperty, deviceObjectType, devicePropertyType,
+                StringUtils.center(devicePropertyValue + operation + tunningValue, sizeProperty), result+"\n");
     }
 
     private ArrayList<String> getMatchPropertyKeyValuePair(Collection<Map<String,String>> deviceObjectTypeCollection, String tuningPropertyKey) {
@@ -275,13 +287,42 @@ public class TuningTest {
         Report report = new Report("tmp/BacnetTuningTestReport.txt");
         Report appendix = new Report("tmp/BacnetTuningTest_APPENDIX.txt");
         if (bacnetSupported && testPassed) {
-            report.writeReport(passedTestReport);
+            String formattedReport = "";
+            if (verboseOutput) {
+                formattedReport = buildReport(passedTestReport, reportAppendix);
+            } else {
+                formattedReport = buildReport(passedTestReport, " Device is compliant to Tuning Policy provided.");
+            }
+            report.writeReport(formattedReport);
         } else if (bacnetSupported && !testPassed) {
-            report.writeReport(failedTestReport);
+            String formattedReport = "";
+            if (verboseOutput) {
+                formattedReport = buildReport(failedTestReport, reportAppendix);
+            } else {
+                formattedReport = buildReport(failedTestReport, description_of_failed_report);
+            }
+            report.writeReport(formattedReport);
         } else {
             report.writeReport(skippedTestReport);
         }
         appendix.writeReport(reportAppendix);
         System.out.println(reportAppendix);
+    }
+
+    private String buildReport(String testResult, String reportDescription) {
+        String textReport = "";
+        textReport += getDashes();
+        textReport += testName + "\n";
+        textReport += getDashes();
+        textReport += testDescription + "\n";
+        textReport += getDashes();
+        textReport += reportDescription;
+        textReport += getDashes();
+        textReport += testResult;
+        return textReport;
+    }
+
+    private String getDashes() {
+        return "--------------------\n";
     }
 }

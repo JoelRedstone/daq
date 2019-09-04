@@ -1,7 +1,6 @@
 package FauxDeviceEngine;
 
 import com.serotonin.bacnet4j.LocalDevice;
-import com.serotonin.bacnet4j.exception.BACnetServiceException;
 import com.serotonin.bacnet4j.npdu.ip.IpNetwork;
 import com.serotonin.bacnet4j.obj.BACnetObject;
 import com.serotonin.bacnet4j.transport.Transport;
@@ -14,7 +13,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -70,6 +68,7 @@ public class EntryPoint {
         String jsonFile = fauxDeviceJSONFilename;
         FileManager fileManager = new FileManager();
         String absolute_path = fileManager.getAbsolutePath();
+        System.out.println("reading json file from: " + absolute_path + "tmp/" + jsonFile);
         JSON json = new JSON(absolute_path + "tmp/" + jsonFile);
         JSONArray bacnetObjectTypesList = json.read();
         return bacnetObjectTypesList;
@@ -77,6 +76,14 @@ public class EntryPoint {
 
     private static void addBacnetProperties(JSONArray bacnetObjectsList) {
         bacnetObjectsList.forEach(bacnetObject -> addProperty((JSONObject) bacnetObject));
+        List<BACnetObject> deviceObjects = localDevice.getLocalObjects();
+        for(BACnetObject object : deviceObjects) {
+            System.out.println(object.getId());
+                List<PropertyIdentifier> properties = object.getProperties();
+                for(PropertyIdentifier propertyIdentifier : properties) {
+                    System.out.println("\t" + propertyIdentifier.toString());
+                }
+        }
     }
 
     private static void getDeviceID(JSONArray bacnetObjectsList) {
@@ -86,6 +93,7 @@ public class EntryPoint {
     private static void getID(JSONObject bacnetObject) {
         List<String> bacnetObjectTypeArr = new ArrayList<>(bacnetObject.keySet());
         String bacnetObjectType = bacnetObjectTypeArr.get(0);
+        System.out.println(bacnetObjectType);
         if(bacnetObjectType.contains("DeviceID")) {
             String IDString = (String) bacnetObject.get(bacnetObjectType);
             int DeviceID = Integer.parseInt(IDString);
@@ -111,7 +119,7 @@ public class EntryPoint {
                 objectTypeValue = ObjectType.binaryOutput;
             } else if(bacnetObjectType.contains("BinaryValue")) {
                 objectTypeValue = ObjectType.binaryValue;
-            }
+            } else { return; }
             BACnetObject bacnetType = new BACnetObject(localDevice,
                     localDevice.getNextInstanceObjectIdentifier(objectTypeValue), false);
             Map<String, String > map = (Map<String, String>) bacnetObject.get(bacnetObjectType);
