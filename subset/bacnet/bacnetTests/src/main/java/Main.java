@@ -9,6 +9,7 @@ public class Main {
     String broadcastIp = args[1];
     String localIp = args[2];
     boolean verboseOutput = Boolean.parseBoolean(args[3]);
+    System.out.println(verboseOutput);
 
     switch (bacnetTestId) {
       case "bacnet_VERSION":

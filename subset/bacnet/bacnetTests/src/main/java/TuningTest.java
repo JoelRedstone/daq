@@ -21,17 +21,17 @@ public class TuningTest {
     private boolean bacnetSupported = false;
     private boolean testPassed = true;
     private String reportAppendix = "";
-    private String description_of_failed_report = "";
     private String jsonFilePath = "bacnet_tuning.json";
     private String testName = "protocol.bacnet.tuning";
     private String testDescription = "Check if bacnet device is compliant with tuning policy provided.";
-    private String passedTestReport = String.format("RESULT pass %s\n", testName);
-    private String failedTestReport = String.format("RESULT fail %s\n", testName);
-    private String skippedTestReport = String.format("RESULT skip %s\n", testName);
+    private String passedTestReport = String.format("RESULT pass %s", testName);
+    private String failedTestReport = String.format("RESULT fail %s", testName);
+    private String skippedTestReport = String.format("RESULT skip %s", testName);
     private String formatProperty = "%-25s%-20s%-30s%-1s";
     private int sizeProperty = 35;
+    private int failedPropertyCounter = 0;
 
-    private boolean debug = false;
+    private boolean debug = true;
 
     String tuningObjectType;
     Map<String, String> tuningPointsMap;
@@ -49,11 +49,11 @@ public class TuningTest {
         connection = new Connection(broadcastIp, IpNetwork.DEFAULT_PORT, localIp);
         while (!connection.isTerminate()) {
             localDevice = connection.getLocalDevice();
-            System.err.println("Sending whois...");
+            System.out.println("Sending whois...");
             localDevice.sendGlobalBroadcast(new WhoIsRequest());
-            System.err.println("Waiting...");
+            System.out.println("Waiting...");
             Thread.sleep(5000);
-            System.err.println("Processing...");
+            System.out.println("Processing...");
             validator = new BacnetValidation(localDevice);
             bacnetSupported = validator.checkIfBacnetSupported();
             if (bacnetSupported) {
@@ -77,7 +77,7 @@ public class TuningTest {
             jsonFilePath = auxFolder + "/" + jsonFilePath;
             JSON json = null;
             if(debug) {
-                json = new JSON("src/main/resources/bacnet_tuning.json"); // just for debug purpose only
+                json = new JSON("src/main/resources/bacnet_tuning.json"); // for debug purpose only
             } else { json = new JSON(jsonFilePath); }
             bacnetTuning = json.read();
         } catch (Exception e) {
@@ -139,15 +139,19 @@ public class TuningTest {
         ArrayList<String> matchDeviceProperty = getMatchPropertyKeyValuePair(deviceObjectTypeCollection, tuningPropertyKey);
         if (matchDeviceProperty.size() == 0) {
             appendToReport(deviceObjectType, tuningPropertyKey, "NOT FOUND", tuningPropertyValue, "FAILED");
+            failedPropertyCounter ++;
             return;
         }
         String devicePropertyKey = matchDeviceProperty.get(0);
         String devicePropertyValue = matchDeviceProperty.get(1);
         boolean comparisonPassed = compareResult(devicePropertyValue, tuningPropertyValue);
         if (comparisonPassed) {
-            appendToReport(deviceObjectType, devicePropertyKey, devicePropertyValue, tuningPropertyValue, "PASSED");
+            if (verboseOutput) {
+                appendToReport(deviceObjectType, devicePropertyKey, devicePropertyValue, tuningPropertyValue, "PASSED");
+            }
         } else {
             appendToReport(deviceObjectType, devicePropertyKey, devicePropertyValue, tuningPropertyValue, "FAILED");
+            failedPropertyCounter ++;
         }
     }
 
@@ -166,9 +170,11 @@ public class TuningTest {
                 ArrayList<String> matchDeviceProperty2 = getMatchPropertyKeyValuePair(deviceObjectTypeCollection, rangePropertyKey2);
                 if (matchDeviceProperty1.size() == 0) {
                     appendToReport(deviceObjectType, rangePropertyKey1, "NOT FOUND", rangePropertyValue1, "FAILED");
+                    failedPropertyCounter ++;
                 }
                 if (matchDeviceProperty2.size() == 0) {
                     appendToReport(deviceObjectType, rangePropertyKey2, "NOT FOUND", rangePropertyValue2, "FAILED");
+                    failedPropertyCounter ++;
                     continue;
                 }
                 String devicePropertyKey1 = matchDeviceProperty1.get(0);
@@ -204,22 +210,26 @@ public class TuningTest {
 
     private boolean compareLowRange(String tuningValue, String deviceValue, String deviceObjectType, String deviceBACnetProperty) {
         if (Float.parseFloat(deviceValue) >= Float.parseFloat(tuningValue)) {
-            appendToReport(deviceObjectType, deviceBACnetProperty, deviceValue, tuningValue, "PASSED", " <= ");
+            if(verboseOutput) {
+                appendToReport(deviceObjectType, deviceBACnetProperty, deviceValue, tuningValue, "PASSED", " <= ");
+            }
             return true;
         }
         appendToReport(deviceObjectType, deviceBACnetProperty, deviceValue, tuningValue, "FAILED", " >= ");
-        appendToDescriptionOfFailedReport(deviceObjectType, deviceBACnetProperty, deviceValue, tuningValue, "FAILED", " >= ");
+        failedPropertyCounter ++;
         failedTest();
         return false;
     }
 
     private boolean compareHighRange(String tuningValue, String deviceValue, String deviceObjectType, String deviceBACnetProperty) {
         if (Float.parseFloat(deviceValue) <= Float.parseFloat(tuningValue)) {
-            appendToReport(deviceObjectType, deviceBACnetProperty, deviceValue, tuningValue, "PASSED", " <= ");
+            if (verboseOutput) {
+                appendToReport(deviceObjectType, deviceBACnetProperty, deviceValue, tuningValue, "PASSED", " <= ");
+            }
             return true;
         }
         appendToReport(deviceObjectType, deviceBACnetProperty, deviceValue, tuningValue, "FAILED", " <= ");
-        appendToDescriptionOfFailedReport(deviceObjectType, deviceBACnetProperty, deviceValue, tuningValue, "FAILED", " <= ");
+        failedPropertyCounter ++;
         failedTest();
         return false;
     }
@@ -244,12 +254,6 @@ public class TuningTest {
         reportAppendix += String.format(formatProperty, devicePropertyType, deviceProperty,
                 StringUtils.center(devicePropertyValue + " - " + propertyValue, sizeProperty), result+"\n");
         failedTest();
-    }
-
-    private void appendToDescriptionOfFailedReport(String deviceObjectType, String devicePropertyType, String devicePropertyValue,
-                                                   String tunningValue, String result, String operation) {
-        description_of_failed_report += String.format(formatProperty, deviceObjectType, devicePropertyType,
-                StringUtils.center(devicePropertyValue + operation + tunningValue, sizeProperty), result+"\n");
     }
 
     private ArrayList<String> getMatchPropertyKeyValuePair(Collection<Map<String,String>> deviceObjectTypeCollection, String tuningPropertyKey) {
@@ -285,40 +289,34 @@ public class TuningTest {
 
     private void generateReport() {
         Report report = new Report("tmp/BacnetTuningTestReport.txt");
-        Report appendix = new Report("tmp/BacnetTuningTest_APPENDIX.txt");
         if (bacnetSupported && testPassed) {
             String formattedReport = "";
             if (verboseOutput) {
-                formattedReport = buildReport(passedTestReport, reportAppendix);
+                formattedReport = buildReport(passedTestReport, reportAppendix, " Device is compliant to Tuning Policy provided.\n");
             } else {
-                formattedReport = buildReport(passedTestReport, " Device is compliant to Tuning Policy provided.");
+                formattedReport = buildReport(passedTestReport, "N/A",  " Device is compliant to Tuning Policy provided.\n");
             }
             report.writeReport(formattedReport);
         } else if (bacnetSupported && !testPassed) {
-            String formattedReport = "";
-            if (verboseOutput) {
-                formattedReport = buildReport(failedTestReport, reportAppendix);
-            } else {
-                formattedReport = buildReport(failedTestReport, description_of_failed_report);
-            }
+            String desc = failedTestReport + " bacnet property found not compliant";
+            String formattedReport = buildReport(failedTestReport, reportAppendix, desc);
             report.writeReport(formattedReport);
         } else {
-            report.writeReport(skippedTestReport);
+            report.writeReport(skippedTestReport + " No BACnet device found\n");
         }
-        appendix.writeReport(reportAppendix);
         System.out.println(reportAppendix);
     }
 
-    private String buildReport(String testResult, String reportDescription) {
+    private String buildReport(String testResult, String appendix, String reportDescription) {
         String textReport = "";
         textReport += getDashes();
         textReport += testName + "\n";
         textReport += getDashes();
         textReport += testDescription + "\n";
         textReport += getDashes();
-        textReport += reportDescription;
+        textReport += appendix + "\n";
         textReport += getDashes();
-        textReport += testResult;
+        textReport += testResult + " " + reportDescription;
         return textReport;
     }
 

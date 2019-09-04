@@ -43,5 +43,3 @@ cat tmp/*BacnetVersionTest_APPENDIX.txt >> $REPORT
 cat tmp/*BacnetPICSTestReport.txt >> $REPORT
 cat tmp/*BacnetPICSTest_APPENDIX.txt >> $REPORT
 cat tmp/BacnetTuningTestReport.txt >> $REPORT
-cat tmp/BacnetTuningTest_APPENDIX.txt >> $REPORT
-

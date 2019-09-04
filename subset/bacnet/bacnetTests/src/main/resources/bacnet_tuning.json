@@ -2,10 +2,10 @@
     {
         "Analog_Input": {
 	    "Cov_Increment": "1.0",
-	    "Out_Of_Service": "true",
+	    "Out_Of_Service": "false",
 	    "range": [
 		{
-			"Low_limit": "4.0",
+			"Low_limit": "0.0",
 			"High_limit": "240.0"
 		}
 	    ]
@@ -17,7 +17,7 @@
 	    "Out_Of_Service": "false",
 	    "range": [
 		{
-			"Low_limit": "5.0",
+			"Low_limit": "0.0",
 			"High_limit": "240.0"
 		}
 	    ]
@@ -25,11 +25,11 @@
     },
     {
         "Analog_Value": {
-	    "Cov_Increment": "1.0",
+	    "Cov_Increment": "1.2",
 	    "Out_Of_Service": "false",
 	    "range": [
 		{
-			"Low_limit": "5.0",
+			"Low_limit": "0.0",
 			"High_limit": "240.0"
 		}
 	    ]
