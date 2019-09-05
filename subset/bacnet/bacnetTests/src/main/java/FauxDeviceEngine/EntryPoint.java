@@ -1,22 +1,31 @@
 package FauxDeviceEngine;
 
 import com.serotonin.bacnet4j.LocalDevice;
-import com.serotonin.bacnet4j.exception.BACnetServiceException;
+import com.serotonin.bacnet4j.RemoteDevice;
+import com.serotonin.bacnet4j.RemoteObject;
+import com.serotonin.bacnet4j.event.DeviceEventListener;
+import com.serotonin.bacnet4j.exception.BACnetException;
 import com.serotonin.bacnet4j.npdu.ip.IpNetwork;
 import com.serotonin.bacnet4j.obj.BACnetObject;
+import com.serotonin.bacnet4j.service.confirmed.ReinitializeDeviceRequest;
 import com.serotonin.bacnet4j.transport.Transport;
-import com.serotonin.bacnet4j.type.enumerated.ObjectType;
-import com.serotonin.bacnet4j.type.enumerated.PropertyIdentifier;
+import com.serotonin.bacnet4j.type.Encodable;
+import com.serotonin.bacnet4j.type.constructed.*;
+import com.serotonin.bacnet4j.type.enumerated.*;
+import com.serotonin.bacnet4j.type.notificationParameters.NotificationParameters;
+import com.serotonin.bacnet4j.type.primitive.Boolean;
 import com.serotonin.bacnet4j.type.primitive.CharacterString;
+import com.serotonin.bacnet4j.type.primitive.ObjectIdentifier;
+import com.serotonin.bacnet4j.type.primitive.UnsignedInteger;
 import helper.FileManager;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 public class EntryPoint {
 
@@ -25,6 +34,8 @@ public class EntryPoint {
     private static LocalDevice localDevice;
     private static String fauxDeviceJSONFilename = "";
     private static int timeout = 1000;
+    private static int updateTime = 1500;
+    public static Analog analog;
 
     public static void main(String[] args) {
         if (args.length != 3) {
@@ -51,10 +62,19 @@ public class EntryPoint {
             localDevice = new LocalDevice(deviceId, transport);
             localDevice.getConfiguration().setProperty(PropertyIdentifier.modelName,
                     new CharacterString("BACnet4J LoopDevice"));
+            localDevice.getEventHandler().addListener(new Listener());
             System.out.println("Local device is running with device id " + deviceId);
             addBacnetProperties(bacnetObjectArray);
             localDevice.initialize();
+            // Send an iam.
+            localDevice.sendGlobalBroadcast(localDevice.getIAm());
             System.out.println("Device initialized...");
+
+
+            startUpdatingPoints();
+//            BACnetPoint bacnetPoint = new BACnetPoint("device_run_command",localDevice);
+//            bacnetPoint.updatePropertyValue("Present_Value", "0.9");
+//            bacnetPoint.updatePropertyValue("Out_Of_Service", "true");
         } catch (RuntimeException e) {
             System.out.println("Ex in LoopDevice() ");
             e.printStackTrace();
@@ -111,13 +131,13 @@ public class EntryPoint {
                 objectTypeValue = ObjectType.binaryOutput;
             } else if(bacnetObjectType.contains("BinaryValue")) {
                 objectTypeValue = ObjectType.binaryValue;
-            }
+            } else { return; }
             BACnetObject bacnetType = new BACnetObject(localDevice,
                     localDevice.getNextInstanceObjectIdentifier(objectTypeValue), false);
             Map<String, String > map = (Map<String, String>) bacnetObject.get(bacnetObjectType);
             int objectTypeIntValue = objectTypeValue.intValue();
             if(objectTypeIntValue >= 0 && objectTypeIntValue < 3) {
-                new Analog(localDevice, bacnetType, map);
+                analog = new Analog(localDevice, bacnetType, map);
             }else if(objectTypeIntValue >= 3 && objectTypeIntValue < 6) {
                 new Binary(localDevice, bacnetType, map);
             }
@@ -125,5 +145,96 @@ public class EntryPoint {
             e.printStackTrace();
             System.out.println(e.getMessage());
         }
+    }
+
+    private static void startUpdatingPoints() {
+        Runnable updaterRunnable =
+                () -> {
+                    try {
+                        update();
+                    } catch (ExecutionException e) {
+                        e.printStackTrace();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                };
+        Thread updaterThread = new Thread(updaterRunnable);
+        updaterThread.start();
+    }
+
+    private static void update() throws ExecutionException, InterruptedException {
+        float value = 0.3f;
+        int value1 = 0;
+        while (true) {
+            if(value > 100f) { value = 0f; }
+            value += 0.3f;
+            value1 = value1 == 1 ? 0 : 1;
+            String valueStr = String.valueOf(value);
+            String valueStr1 = String.valueOf(value1);
+            BACnetPoint bacnetPoint = new BACnetPoint("device_run_command",localDevice);
+            bacnetPoint.updatePropertyValue("Present_Value", valueStr);
+            BACnetPoint bacnetPoint1 = new BACnetPoint("chiller_water_valve_percentage_command",localDevice);
+            bacnetPoint1.updatePropertyValue("Present_Value", valueStr1);
+            Thread.sleep(updateTime);
+        }
+    }
+}
+
+class Listener implements DeviceEventListener {
+
+    @Override
+    public void listenerException(Throwable throwable) {
+
+    }
+
+    @Override
+    public void iAmReceived(RemoteDevice remoteDevice) {
+
+    }
+
+    @Override
+    public boolean allowPropertyWrite(BACnetObject baCnetObject, PropertyValue propertyValue) {
+        return true;
+    }
+
+    @Override
+    public void propertyWritten(BACnetObject baCnetObject, PropertyValue propertyValue) {
+        System.out.println("Wrote " + propertyValue + " to " + baCnetObject);
+    }
+
+    @Override
+    public void iHaveReceived(RemoteDevice remoteDevice, RemoteObject remoteObject) {
+        System.out.println("Ihavereceived");
+
+    }
+
+    @Override
+    public void covNotificationReceived(UnsignedInteger unsignedInteger, RemoteDevice remoteDevice, ObjectIdentifier objectIdentifier, UnsignedInteger unsignedInteger1, SequenceOf<PropertyValue> sequenceOf) {
+        System.out.println("1");
+    }
+
+    @Override
+    public void eventNotificationReceived(UnsignedInteger unsignedInteger, RemoteDevice remoteDevice, ObjectIdentifier objectIdentifier, TimeStamp timeStamp, UnsignedInteger unsignedInteger1, UnsignedInteger unsignedInteger2, EventType eventType, CharacterString characterString, NotifyType notifyType, Boolean aBoolean, EventState eventState, EventState eventState1, NotificationParameters notificationParameters) {
+        System.out.println("2");
+    }
+
+    @Override
+    public void textMessageReceived(RemoteDevice remoteDevice, Choice choice, MessagePriority messagePriority, CharacterString characterString) {
+
+    }
+
+    @Override
+    public void privateTransferReceived(UnsignedInteger unsignedInteger, UnsignedInteger unsignedInteger1, Encodable encodable) {
+
+    }
+
+    @Override
+    public void reinitializeDevice(ReinitializeDeviceRequest.ReinitializedStateOfDevice reinitializedStateOfDevice) {
+
+    }
+
+    @Override
+    public void synchronizeTime(DateTime dateTime, boolean b) {
+
     }
 }
