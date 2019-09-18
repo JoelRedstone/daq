@@ -17,6 +17,9 @@ public class Main {
       case "bacnet_PICS":
         new PicsTest(localIp, broadcastIp, verboseOutput);
         break;
+        case "bacnet_COMPLIANCE":
+            new ComplianceTest(localIp, broadcastIp, verboseOutput);
+            break;
       default:
         throw new IllegalArgumentException("Invalid bacnetTestId.");
     }

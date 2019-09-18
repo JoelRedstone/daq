@@ -1,0 +1,13 @@
+[
+    {
+	"monitoring_time": "1"
+    },
+    {
+        "Analog_Input_1": {
+	    "Cov_Increment": "1.0",
+	    "Update_Interval": "7000",
+	    "Update_Interval_Approx": "500"
+        }, 
+        "Binary_Input_0": {}
+    }
+]

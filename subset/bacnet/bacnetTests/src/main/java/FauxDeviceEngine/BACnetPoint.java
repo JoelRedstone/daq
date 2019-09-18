@@ -35,4 +35,22 @@ public class BACnetPoint {
             System.out.println(bacnetObject.getId().toString() + " // " +propertyIdentifier.toString() + ": " + encodable.toString() + " exit code: " + exitCode);
         }
     }
+
+    public PropertyIdentifier getPointMap(String propertyIdentifierName) {
+        Map<PropertyIdentifier, Encodable> property = null;
+        PropertyIdentifier propertyIdentifier = null;
+        if(bacnetObject.getId().toString().toLowerCase().contains("analog")) {
+            property = new Analog().processObjectProperty(propertyIdentifierName, null);
+        } else if (bacnetObject.getId().toString().toLowerCase().contains("binary")) {
+            property = new Binary().processObjectProperty(propertyIdentifierName, null);
+        } else { return null; }
+        for (Map.Entry<PropertyIdentifier, Encodable> p : property.entrySet()) {
+            propertyIdentifier = p.getKey();
+        }
+        return propertyIdentifier;
+    }
+
+    public BACnetObject getBacnetObject() {
+        return bacnetObject;
+    }
 }

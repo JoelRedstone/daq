@@ -61,4 +61,8 @@ public class FileManager {
         }
         return "/config/type";
     }
+
+    public String getAuxFolderPath() {
+        return "/config/type";
+    }
 }

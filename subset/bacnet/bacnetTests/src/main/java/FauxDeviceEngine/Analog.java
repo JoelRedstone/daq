@@ -73,167 +73,177 @@ public class Analog {
         Encodable encodable = null;
         PropertyIdentifier propertyIdentifier = null;
         Map<PropertyIdentifier, Encodable> pointProperty = new HashMap<>();
-        switch (objectProperty) {
-            case "Present_Value":
-                presentValue = Float.parseFloat(propertyValue);
-                encodable = new Real(presentValue);
-                propertyIdentifier = PropertyIdentifier.presentValue;
-                break;
-            case "Object_Name":
-                objectName = propertyValue;
-                encodable = new CharacterString(objectName);
-                propertyIdentifier = PropertyIdentifier.objectName;
-                break;
-            case "Device_Type":
-                deviceType = propertyValue;
-                encodable = new CharacterString(deviceType);
-                propertyIdentifier = PropertyIdentifier.deviceType;
-                break;
-            case "Deadband":
-                deadband = Float.parseFloat(propertyValue);
-                encodable = new Real(deadband);
-                propertyIdentifier = PropertyIdentifier.deadband;
-                break;
-            case "Out_Of_Service":
-                outOfService = Boolean.valueOf(propertyValue);
-                encodable = new com.serotonin.bacnet4j.type.primitive.Boolean(outOfService);
-                propertyIdentifier = PropertyIdentifier.outOfService;
-                break;
-            case "Resolution" :
-                resolution = Float.parseFloat(propertyValue);
-                encodable = new Real(resolution);
-                propertyIdentifier = PropertyIdentifier.resolution;
-                break;
-            case "Event_Enable":
-                eventEnable = device.castToArrayBoolean(propertyValue);
-                encodable = new EventTransitionBits(eventEnable[0], eventEnable[1], eventEnable[2]);
-                propertyIdentifier = PropertyIdentifier.eventEnable;
-                break;
-            case "Event_State":
-                eventState = Integer.parseInt(propertyValue);
-                encodable = new EventState(eventState);
-                propertyIdentifier = PropertyIdentifier.eventState;
-                break;
-            case "Object_Type":
-                objectType = Integer.parseInt(propertyValue);
-                encodable = new ObjectType(objectType);
-                propertyIdentifier = PropertyIdentifier.objectType;
-                break;
-            case "Time_Delay_Normal":
-                timeDelayNormal = Integer.parseInt(propertyValue);
-                encodable = new UnsignedInteger(timeDelayNormal);
-                propertyIdentifier = PropertyIdentifier.timeDelayNormal;
-                break;
-            case "Low_Limit":
-                lowLimit = Float.parseFloat(propertyValue);
-                encodable = new Real(lowLimit);
-                propertyIdentifier = PropertyIdentifier.lowLimit;
-                break;
-            case "Limit_Enable":
-                limitEnable = device.castToArrayBoolean(propertyValue);
-                encodable = new LimitEnable(limitEnable[0], limitEnable[1]);
-                propertyIdentifier = PropertyIdentifier.limitEnable;
-                break;
-            case "Cov_Increment":
-                covIncrement = Float.parseFloat(propertyValue);
-                encodable = new Real(covIncrement);
-                propertyIdentifier = PropertyIdentifier.covIncrement;
-                break;
-            case "Status_Flags":
-                statusFlags = device.castToArrayBoolean(propertyValue);
-                encodable = new StatusFlags(statusFlags[0], statusFlags[1], statusFlags[2], statusFlags[3]);
-                propertyIdentifier = PropertyIdentifier.statusFlags;
-                break;
-            case "Update_Interval":
-                updateInterval = Integer.parseInt(propertyValue);
-                encodable = new UnsignedInteger(updateInterval);
-                propertyIdentifier = PropertyIdentifier.updateInterval;
-                break;
-            case "Acked_Transitions":
-                ackedTransitions = device.castToArrayBoolean(propertyValue);
-                encodable = new EventTransitionBits(ackedTransitions[0], ackedTransitions[1], ackedTransitions[2]);
-                propertyIdentifier = PropertyIdentifier.ackedTransitions;
-                break;
-            case "High_Limit":
-                highLimit = Float.parseFloat(propertyValue);
-                encodable = new Real(highLimit);
-                propertyIdentifier = PropertyIdentifier.highLimit;
-                break;
-            case "Notify_Type":
-                notifyType = Integer.parseInt(propertyValue);
-                encodable = new NotifyType(notifyType);
-                propertyIdentifier = PropertyIdentifier.notifyType;
-                break;
-            case "Event_Detection_Enable":
-                eventDetectionEnable = Boolean.parseBoolean(propertyValue);
-                encodable = new com.serotonin.bacnet4j.type.primitive.Boolean(eventDetectionEnable);
-                propertyIdentifier = PropertyIdentifier.eventDetectionEnable;
-                break;
-            case "Max_Pres_Value":
-                maxPresValue = Float.parseFloat(propertyValue);
-                encodable = new Real(maxPresValue);
-                propertyIdentifier = PropertyIdentifier.maxPresValue;
-                break;
-            case "Min_Pres_Value":
-                minPresValue = Float.parseFloat(propertyValue);
-                encodable = new Real(minPresValue);
-                propertyIdentifier = PropertyIdentifier.minPresValue;
-                break;
-            case "Reliability":
-                reliability = Integer.parseInt(propertyValue);
-                encodable = new Reliability(reliability);
-                propertyIdentifier = PropertyIdentifier.reliability;
-                break;
-            case "Event_Message_Texts":
-                if(Boolean.parseBoolean(propertyValue)) {
-                    eventTransitionBits = new SequenceOf<EventTransitionBits>();
-                    encodable = eventTransitionBits;
-                    propertyIdentifier = PropertyIdentifier.eventMessageTexts;
-                }
-                break;
-            case "Notification_Class":
-                notificationClass = Integer.parseInt(propertyValue);
-                encodable = new UnsignedInteger(notificationClass);
-                propertyIdentifier = PropertyIdentifier.notificationClass;
-                break;
-            case "Description":
-                description = propertyValue;
-                encodable = new CharacterString(description);
-                propertyIdentifier = PropertyIdentifier.description;
-                break;
-            case "Event_Algorithm_Inhibit":
-                eventAlgorithmInhibit = Boolean.parseBoolean(propertyValue);
-                encodable = new com.serotonin.bacnet4j.type.primitive.Boolean(eventAlgorithmInhibit);
-                propertyIdentifier = PropertyIdentifier.eventAlgorithmInhibit;
-                break;
-            case "Units":
-                units = Integer.parseInt(propertyValue);
-                encodable = new EngineeringUnits(units);
-                propertyIdentifier = PropertyIdentifier.units;
-                break;
-            case "Profile_Name":
-                profileName = propertyValue;
-                encodable = new CharacterString(profileName);
-                propertyIdentifier = PropertyIdentifier.profileName;
-                break;
-            case "Relinquish_Default":
-                relinquishDefault = Float.parseFloat(propertyValue);
-                encodable = new Real(relinquishDefault);
-                propertyIdentifier = PropertyIdentifier.relinquishDefault;
-                break;
-            case "Priority_Array":
-                priorityArray = Boolean.parseBoolean(propertyValue);
-                if(priorityArray) {
-                    encodable = new PriorityArray();
-                    propertyIdentifier = PropertyIdentifier.priorityArray;
-                }
-                break;
+        try {
+            switch (objectProperty) {
+                case "Present_Value":
+                    propertyIdentifier = PropertyIdentifier.presentValue;
+                    presentValue = Float.parseFloat(propertyValue);
+                    encodable = new Real(presentValue);
+                    break;
+                case "Object_Name":
+                    propertyIdentifier = PropertyIdentifier.objectName;
+                    objectName = propertyValue;
+                    encodable = new CharacterString(objectName);
+                    break;
+                case "Device_Type":
+                    propertyIdentifier = PropertyIdentifier.deviceType;
+                    deviceType = propertyValue;
+                    encodable = new CharacterString(deviceType);
+                    break;
+                case "Deadband":
+                    propertyIdentifier = PropertyIdentifier.deadband;
+                    deadband = Float.parseFloat(propertyValue);
+                    encodable = new Real(deadband);
+                    break;
+                case "Out_Of_Service":
+                    propertyIdentifier = PropertyIdentifier.outOfService;
+                    outOfService = Boolean.valueOf(propertyValue);
+                    encodable = new com.serotonin.bacnet4j.type.primitive.Boolean(outOfService);
+                    break;
+                case "Resolution":
+                    propertyIdentifier = PropertyIdentifier.resolution;
+                    resolution = Float.parseFloat(propertyValue);
+                    encodable = new Real(resolution);
+                    break;
+                case "Event_Enable":
+                    propertyIdentifier = PropertyIdentifier.eventEnable;
+                    eventEnable = device.castToArrayBoolean(propertyValue);
+                    encodable = new EventTransitionBits(eventEnable[0], eventEnable[1], eventEnable[2]);
+                    break;
+                case "Event_State":
+                    propertyIdentifier = PropertyIdentifier.eventState;
+                    eventState = Integer.parseInt(propertyValue);
+                    encodable = new EventState(eventState);
+                    break;
+                case "Object_Type":
+                    propertyIdentifier = PropertyIdentifier.objectType;
+                    objectType = Integer.parseInt(propertyValue);
+                    encodable = new ObjectType(objectType);
+                    break;
+                case "Time_Delay_Normal":
+                    propertyIdentifier = PropertyIdentifier.timeDelayNormal;
+                    timeDelayNormal = Integer.parseInt(propertyValue);
+                    encodable = new UnsignedInteger(timeDelayNormal);
+                    break;
+                case "Low_Limit":
+                    propertyIdentifier = PropertyIdentifier.lowLimit;
+                    lowLimit = Float.parseFloat(propertyValue);
+                    encodable = new Real(lowLimit);
+                    break;
+                case "Limit_Enable":
+                    propertyIdentifier = PropertyIdentifier.limitEnable;
+                    limitEnable = device.castToArrayBoolean(propertyValue);
+                    encodable = new LimitEnable(limitEnable[0], limitEnable[1]);
+                    break;
+                case "Cov_Increment":
+                    propertyIdentifier = PropertyIdentifier.covIncrement;
+                    covIncrement = Float.parseFloat(propertyValue);
+                    encodable = new Real(covIncrement);
+                    break;
+                case "Status_Flags":
+                    propertyIdentifier = PropertyIdentifier.statusFlags;
+                    statusFlags = device.castToArrayBoolean(propertyValue);
+                    encodable = new StatusFlags(statusFlags[0], statusFlags[1], statusFlags[2], statusFlags[3]);
+                    break;
+                case "Update_Interval":
+                    propertyIdentifier = PropertyIdentifier.updateInterval;
+                    updateInterval = Integer.parseInt(propertyValue);
+                    encodable = new UnsignedInteger(updateInterval);
+                    break;
+                case "Acked_Transitions":
+                    propertyIdentifier = PropertyIdentifier.ackedTransitions;
+                    ackedTransitions = device.castToArrayBoolean(propertyValue);
+                    encodable = new EventTransitionBits(ackedTransitions[0], ackedTransitions[1], ackedTransitions[2]);
 
-            default:
-                throw new IllegalArgumentException(objectProperty + " not found.");
+                    break;
+                case "High_Limit":
+                    propertyIdentifier = PropertyIdentifier.highLimit;
+                    highLimit = Float.parseFloat(propertyValue);
+                    encodable = new Real(highLimit);
+
+                    break;
+                case "Notify_Type":
+                    propertyIdentifier = PropertyIdentifier.notifyType;
+                    notifyType = Integer.parseInt(propertyValue);
+                    encodable = new NotifyType(notifyType);
+                    break;
+                case "Event_Detection_Enable":
+                    propertyIdentifier = PropertyIdentifier.eventDetectionEnable;
+                    eventDetectionEnable = Boolean.parseBoolean(propertyValue);
+                    encodable = new com.serotonin.bacnet4j.type.primitive.Boolean(eventDetectionEnable);
+                    break;
+                case "Max_Pres_Value":
+                    propertyIdentifier = PropertyIdentifier.maxPresValue;
+                    maxPresValue = Float.parseFloat(propertyValue);
+                    encodable = new Real(maxPresValue);
+                    break;
+                case "Min_Pres_Value":
+                    propertyIdentifier = PropertyIdentifier.minPresValue;
+                    minPresValue = Float.parseFloat(propertyValue);
+                    encodable = new Real(minPresValue);
+                    break;
+                case "Reliability":
+                    propertyIdentifier = PropertyIdentifier.reliability;
+                    reliability = Integer.parseInt(propertyValue);
+                    encodable = new Reliability(reliability);
+                    break;
+                case "Event_Message_Texts":
+                    propertyIdentifier = PropertyIdentifier.eventMessageTexts;
+                    if (Boolean.parseBoolean(propertyValue)) {
+                        eventTransitionBits = new SequenceOf<EventTransitionBits>();
+                        encodable = eventTransitionBits;
+                    }
+                    break;
+                case "Notification_Class":
+                    propertyIdentifier = PropertyIdentifier.notificationClass;
+                    notificationClass = Integer.parseInt(propertyValue);
+                    encodable = new UnsignedInteger(notificationClass);
+                    break;
+                case "Description":
+                    propertyIdentifier = PropertyIdentifier.description;
+                    description = propertyValue;
+                    encodable = new CharacterString(description);
+                    break;
+                case "Event_Algorithm_Inhibit":
+                    propertyIdentifier = PropertyIdentifier.eventAlgorithmInhibit;
+                    eventAlgorithmInhibit = Boolean.parseBoolean(propertyValue);
+                    encodable = new com.serotonin.bacnet4j.type.primitive.Boolean(eventAlgorithmInhibit);
+                    break;
+                case "Units":
+                    propertyIdentifier = PropertyIdentifier.units;
+                    units = Integer.parseInt(propertyValue);
+                    encodable = new EngineeringUnits(units);
+                    break;
+                case "Profile_Name":
+                    propertyIdentifier = PropertyIdentifier.profileName;
+                    profileName = propertyValue;
+                    encodable = new CharacterString(profileName);
+                    break;
+                case "Relinquish_Default":
+                    propertyIdentifier = PropertyIdentifier.relinquishDefault;
+                    relinquishDefault = Float.parseFloat(propertyValue);
+                    encodable = new Real(relinquishDefault);
+                    break;
+                case "Priority_Array":
+                    propertyIdentifier = PropertyIdentifier.priorityArray;
+                    priorityArray = Boolean.parseBoolean(propertyValue);
+                    if (priorityArray) {
+                        encodable = new PriorityArray();
+                    }
+                    break;
+
+                default:
+                    throw new IllegalArgumentException(objectProperty + " not found.");
+            }
+        } catch (Exception e) {
+            encodable = null;
         }
         pointProperty.put(propertyIdentifier, encodable);
         return pointProperty;
+    }
+
+    public int getUpdateInterval() {
+        return updateInterval;
     }
 
 }
