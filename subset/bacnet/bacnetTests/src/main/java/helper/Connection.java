@@ -13,42 +13,27 @@ public class Connection {
 
   private final int deviceId = (int) Math.floor(Math.random() * 1000.0);
 
-  public Connection(String broadcastAddress, int port) throws BACnetServiceException, Exception {
+  public Connection(String broadcastAddress, int port) throws Exception {
     this(broadcastAddress, port, IpNetwork.DEFAULT_BIND_IP);
   }
 
-  public Connection(String broadcastAddress, int port, String localAddress) {
-//    network = new IpNetwork(broadcastAddress, port, IpNetwork.DEFAULT_BIND_IP, 0, localAddress);
-//    System.out.println("Creating LoopDevice id " + deviceId);
-//    Transport transport = new Transport(network);
-//    transport.setTimeout(1000);
-//    localDevice = new LocalDevice(deviceId, transport);
-
+  public Connection(String broadcastAddress, int port, String localAddress) throws Exception {
       init(broadcastAddress, port, localAddress);
-//    try {
-//      localDevice
-//          .getEventHandler()
-//          .addListener( new Listener(covNotificationAnalizer));
-//      localDevice.initialize();
-//    } catch (RuntimeException e) {
-//      System.out.println("Error: " + e.getMessage());
-//      localDevice.terminate();
-//      localDevice = null;
-//      throw e;
-//    }
   }
 
-  public Connection(String broadcastAddress, int port, String localAddress, CovNotificationAnalizer covNotificationAnalizer ) {
+  public Connection(String broadcastAddress, int port, String localAddress, CovNotificationAnalizer
+          covNotificationAnalizer ) throws Exception {
       init(broadcastAddress, port, localAddress);
       addListener(covNotificationAnalizer);
   }
 
-  private void init(String broadcastAddress, int port, String localAddress) {
+  private void init(String broadcastAddress, int port, String localAddress) throws Exception {
       network = new IpNetwork(broadcastAddress, port, IpNetwork.DEFAULT_BIND_IP, 0, localAddress);
       System.out.println("Creating LoopDevice id " + deviceId);
       Transport transport = new Transport(network);
       transport.setTimeout(1000);
       localDevice = new LocalDevice(deviceId, transport);
+      localDevice.initialize();
   }
 
     private void addListener(CovNotificationAnalizer covNotificationAnalizer) {
@@ -56,7 +41,6 @@ public class Connection {
             localDevice
                     .getEventHandler()
                     .addListener( new Listener(covNotificationAnalizer));
-            localDevice.initialize();
         } catch (RuntimeException e) {
             System.out.println("Error: " + e.getMessage());
             localDevice.terminate();

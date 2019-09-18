@@ -15,12 +15,14 @@ broadcast_ip=${parts[3]}
 
 version_test_id="bacnet_VERSION"
 pics_test_id="bacnet_PICS"
+compliance_test_id="bacnet_COMPLIANCE"
 verbose_output="false"
 
 echo Scanning bacnet $broadcast_ip from $local_ip
 
 java -jar $JAR $pics_test_id $broadcast_ip $local_ip $verbose_output | tee $TMPOUT
 java -jar $JAR $version_test_id $broadcast_ip $local_ip $verbose_output | tee $TMPOUT
+java -jar $JAR $compliance_test_id $broadcast_ip $local_ip $verbose_output | tee $TMPOUT
 
 bacnet_runtime=/config/port/bacnet_runtime.sh
 if [ -f $bacnet_runtime ]; then
@@ -40,3 +42,5 @@ cat tmp/*BacnetVersionTestReport.txt >> $REPORT
 cat tmp/*BacnetVersionTest_APPENDIX.txt >> $REPORT
 cat tmp/*BacnetPICSTestReport.txt >> $REPORT
 cat tmp/*BacnetPICSTest_APPENDIX.txt >> $REPORT
+cat tmp/*BacnetComplianceTestReport.txt >> $REPORT
+cat tmp/*BacnetComplianceTest_APPENDIX.txt >> $REPORT

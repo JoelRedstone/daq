@@ -22,6 +22,8 @@ import java.util.Date;
 public class Listener implements DeviceEventListener {
     private CovNotificationAnalizer covNotificationAnalizer;
 
+    public Listener() {}
+
     public Listener(CovNotificationAnalizer covNotificationAnalizer) {
         this.covNotificationAnalizer = covNotificationAnalizer;
     }

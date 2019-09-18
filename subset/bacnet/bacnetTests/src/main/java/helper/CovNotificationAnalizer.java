@@ -11,8 +11,6 @@ import java.util.*;
 
 public class CovNotificationAnalizer {
 
-    private boolean passedTest = false;
-
     private List<COVNotification> notificationsSet = new ArrayList<>();
     private List<COVNotification> unexpectedNotification = new ArrayList<>();
     private List<String> receivedPointNotificationList = new ArrayList<>();
@@ -185,7 +183,7 @@ public class CovNotificationAnalizer {
     }
 
     public boolean getTestResult() {
-        return this.passedTest;
+        return  unexpectedNotification.size() == 0 ? true : false;
     }
 
     private COVNotification returnLastInserted(String objectIdentifier) {

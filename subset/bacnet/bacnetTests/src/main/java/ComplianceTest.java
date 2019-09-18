@@ -26,7 +26,6 @@ public class ComplianceTest {
     private String localIp = "";
     private String broadcastIp = "";
     boolean bacnetSupported = false;
-    boolean csvFound = true;
     boolean verboseOutput = false;
     private static LocalDevice localDevice;
     private String jsonFilePath = "bacnet_compliance.json";
@@ -35,7 +34,7 @@ public class ComplianceTest {
 
     private CovNotificationAnalizer covNotificationAnalizer;
 
-    private boolean debug = true;
+    private boolean debug = false;
 
     public ComplianceTest(String localIp, String broadcastIp, boolean verboseOutput) throws Exception {
         this.localIp = localIp;
